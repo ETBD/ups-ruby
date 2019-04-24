@@ -34,19 +34,15 @@ module UPS
       # @return [void]
       def validate
         opts[:state] = case opts[:country].downcase
-        when 'us'
-          normalize_us_state(opts[:state])
-        when 'ca'
-          normalize_ca_state(opts[:state])
-        when 'ie'
-          if opts[:skip_ireland_state_validation]
-            '_' # UPS requires at least one character for Ireland
-          else
-            UPS::Data.ie_state_matcher(opts[:state])
-          end
-        else
-          ''
-        end
+                       when 'us'
+                         normalize_us_state(opts[:state])
+                       when 'ca'
+                         normalize_ca_state(opts[:state])
+                       when 'ie'
+                         UPS::Data.ie_state_matcher(opts[:state])
+                       else
+                         ''
+                       end
       end
 
       # Changes :state based on UPS requirements for US Addresses
@@ -120,6 +116,10 @@ module UPS
         element_with_value('EmailAddress', opts[:email_address][0..49])
       end
 
+      def residential_address
+        element_with_value('ResidentialAddressIndicator', '1')
+      end
+
       # Returns an XML representation of a UPS Address
       #
       # @return [Ox::Element] XML representation of the current object
@@ -132,6 +132,7 @@ module UPS
           address << state
           address << postal_code
           address << country
+          address << residential_address if opts[:residential_address] == true
         end
       end
     end
